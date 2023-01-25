@@ -1,0 +1,206 @@
+﻿using System;
+
+namespace Assignment7
+{
+    public class heap
+    {
+        public int[] data;
+        public int length;
+        public int heapSize;
+        public int largest;
+
+        public int? parent(int i)
+        {
+            decimal result = ((decimal)i - 1) / 2;
+            if (result < 0)
+                return null;
+
+            if ((result % 1) == 0)
+                return (int)result;
+            else
+                return (int)((decimal)i - 2) / 2;
+        }
+
+        public int? left(int i)
+        {
+            //if (((2 * i) + 1) >= (length - 1))
+            if (((2 * i) + 1) > (length - 1))
+                return null;
+            return (2 * i) + 1;
+        }
+
+        public int? right(int i)
+        {
+            if (((2 * i) + 2) >= (length - 1))
+                return null;
+            return (2 * i) + 2;
+        }
+
+        public void maxHeapify(int i)
+        {
+            if (left(i) != null || right(i) != null)
+            {
+                //int l = (int)left(i), r = (int)right(i);
+
+                //if (l <= heapSize && data[l] > data[i])
+                //    largest = l;
+                //else
+                //    largest = i;
+
+                //if (r <= heapSize && data[r] > data[largest])
+                //    largest = r;
+
+                int? l = left(i), r = right(i);
+
+                if (l != null)
+                {
+                    if (l <= heapSize && data[(int)l] > data[i])
+                        largest = (int)l;
+                    else
+                        largest = i;
+                }
+
+                if (r != null)
+                {
+                    if (r <= heapSize && data[(int)r] > data[largest])
+                        largest = (int)r;
+                }
+
+                if (largest != i)
+                {
+                    int ph = data[i];
+                    data[i] = data[largest];
+                    data[largest] = ph;
+
+                    maxHeapify(largest);
+                }
+            }
+        }
+
+        public void buildMaxHeap()
+        {
+            heapSize = length;
+            for (int i = length / 2; i >= 0; i--)
+                maxHeapify(i);
+        }
+
+        //public void heapSort()
+        //{
+        //    buildMaxHeap();
+        //    for (int i = length; i >= 2; i--)
+        //    {
+        //        int ph = data[i];
+        //        data[i] = data[1];
+        //        data[1] = ph;
+
+        //        heapSize -= 1;
+        //        maxHeapify(1);
+        //    }
+        //}
+
+        //public int heapMax()
+        //{
+        //    return data[1];
+        //}
+
+        //public int extractMax()
+        //{
+        //    if (heapSize < 1)
+        //        throw new ArgumentException("HEAP UNDERFLOW");
+        //    int max = data[1];
+        //    data[1] = data[heapSize];
+        //    heapSize -= 1;
+        //    maxHeapify(1);
+        //    return max;
+        //}
+
+        public void increaseKey(int i, int key)
+        {
+            if (key < data[i])
+                throw new ArgumentException("HEAP UNDERFLOW");
+            data[i] = key;
+            while (i > 0 && data[(int)parent(i)] < data[i])
+            {
+                int ph = data[i];
+                data[i] = data[(int)parent(i)];
+                data[(int)parent(i)] = ph;
+
+                i = (int)parent(i);
+            }
+        }
+
+        public void maxHeapInsert(int key)
+        {
+            if (heapSize >= length)
+                return;
+            data[heapSize] = int.MinValue;        // int.MinValue! The poor man's -INF!
+            increaseKey(heapSize, key);
+            heapSize += 1;
+        }
+
+        public string maxHeapTest()
+        {
+            for (int i = length - 1; i >= 0; i--)
+            {
+                if (parent(i) != null)
+                {
+                    if (data[(int)parent(i)] < data[i])
+                    {
+                        return "IS NOT MAXHEAP";
+                    }
+                }
+            }
+            return "IS MAXHEAP";
+        }
+
+        public heap(int n) { data = new int[n]; length = n; heapSize = 0; }
+    }
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            heap heapAS = new heap(10);
+            heap heapASR = new heap(10);
+            heap heapAR = new heap(10);
+            heap heapBS = new heap(10);
+            heap heapBSR = new heap(10);
+            heap heapBR = new heap(10);
+
+            int[] sorted = new int[10] { 1, 2, 3, 4, 7, 8, 9, 10, 14, 16 };
+
+            for (int i = 0; i <= 9; i++)
+                heapAS.maxHeapInsert(sorted[i]);
+            Console.WriteLine("heapAS " + heapAS.maxHeapTest());
+
+            int[] sortedReverse = new int[10] { 1, 2, 3, 4, 7, 8, 9, 10, 14, 16 };
+            Array.Reverse(sortedReverse);
+            for (int i = 0; i <= 9; i++)
+                heapASR.maxHeapInsert(sortedReverse[i]);
+            Console.WriteLine("heapASR " + heapASR.maxHeapTest());
+
+            Random rnd = new Random();
+            int[] randomized = new int[10] { 1, 9, 7, 14, 2, 8, 3, 16, 4, 10 };
+            for (int i = 0; i <= 9; i++)
+                heapAR.maxHeapInsert(randomized[i]);
+            Console.WriteLine("heapAR " + heapAR.maxHeapTest());
+
+            Console.WriteLine();
+
+            sorted.CopyTo(heapBS.data, 0);
+            heapBS.buildMaxHeap();
+            Console.WriteLine("heapBS " + heapBS.maxHeapTest());
+
+            sortedReverse.CopyTo(heapBSR.data, 0);
+            heapBSR.buildMaxHeap();
+            Console.WriteLine("heapBSR " + heapBSR.maxHeapTest());
+
+            randomized.CopyTo(heapBR.data, 0);
+            heapBR.buildMaxHeap();
+            Console.WriteLine("heapBR " + heapBR.maxHeapTest());
+
+            Console.WriteLine();
+        }
+    }
+}
