@@ -1,0 +1,13 @@
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.exe
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.deps.json
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.runtimeconfig.json
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.runtimeconfig.dev.json
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.dll
+D:\SCHOOLWORK\CIS 263\Assignment9\bin\Debug\netcoreapp3.1\Assignment9.pdb
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.csproj.AssemblyReference.cache
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.AssemblyInfoInputs.cache
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.AssemblyInfo.cs
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.csproj.CoreCompileInputs.cache
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.dll
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.pdb
+D:\SCHOOLWORK\CIS 263\Assignment9\obj\Debug\netcoreapp3.1\Assignment9.genruntimeconfig.cache

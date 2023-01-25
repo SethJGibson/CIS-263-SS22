@@ -1,0 +1,283 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Assignment10
+{
+    public class graphNode
+    {
+        public List<graphNode> adjacency = new List<graphNode>();
+        public List<int> weight = new List<int>();
+
+        public char key;
+
+        public bool visited = false;
+
+        //public graphNode previous = null;
+
+        public graphNode(char key) { this.key = key; }
+
+        //public graphNode(List<graphNode> adjacency, List<int> weight, char key, bool visited) 
+        //{ 
+
+        //}
+
+        //public object Clone() { return this.MemberwiseClone(); }
+    }
+
+    public class graph
+    {
+        //public int[,] adjacency;
+        //public graph(int n) { adjacency = new int[n, n]; }
+
+        public List<graphNode> asortedNodes = new List<graphNode>();
+
+        public List<graphNode> sortedNodes = new List<graphNode>();
+
+        private void resetVisited()
+        {
+            foreach (graphNode node in asortedNodes)
+                node.visited = false;
+        }
+
+        public void depthFirstSearch(int j, List<graphNode> visitedNodes)
+        {
+            asortedNodes[j].visited = true;
+
+            foreach (graphNode node in asortedNodes[j].adjacency)
+            {
+                if (node.visited == false)
+                    depthFirstSearch(asortedNodes.IndexOf(node), visitedNodes);
+            }
+            visitedNodes.Add(asortedNodes[j]);
+        }
+
+        public void topSort()
+        {
+            int n = asortedNodes.Count;
+
+            for (int j = 0; j < n; j++)
+            {
+                if (asortedNodes[j].visited == false)
+                {
+                    List<graphNode> visitedNodes = new List<graphNode>();
+                    depthFirstSearch(j, visitedNodes);
+                    foreach (graphNode node in visitedNodes)
+                        sortedNodes.Insert(0, node);
+                }
+            }
+        }
+
+        public void printSortedNodes()
+        {
+            Console.WriteLine("~Topological Sort~");
+            foreach (graphNode node in sortedNodes)
+            {
+                if (node != null)
+                    Console.Write(node.key + " ");
+            }
+                
+            Console.WriteLine("");
+        }
+
+        private graphNode[] solve(graphNode start)
+        {
+            Queue<graphNode> exitQueue = new Queue<graphNode>();
+            exitQueue.Enqueue(start);
+
+            start.visited = true;
+
+            graphNode[] previous = new graphNode[asortedNodes.Count];
+            while (exitQueue.Count != 0)
+            {
+                graphNode element = exitQueue.Dequeue();
+                foreach(graphNode node in element.adjacency)
+                {
+                    if (node != null)
+                    {
+                        if (!node.visited)
+                        {
+                            exitQueue.Enqueue(node);
+                            node.visited = true;
+                            //int test = node.adjacency.IndexOf(node);
+                            previous[asortedNodes.IndexOf(node) - 1] = element;
+                        }
+                    }
+                }
+            }
+
+            return previous;
+        }
+
+        private List<graphNode> pathReconstruction(graphNode start, graphNode end, graphNode[] previous)
+        {
+            previous[previous.Length - 1] = end;
+            List<graphNode> path = new List<graphNode>();
+            //graphNode[] path = new graphNode[previous.Length];
+            //int i = previous.Length - 1;
+            //for (graphNode alt = end; alt != null; alt = previous[asortedNodes.IndexOf(alt)])
+            //{
+            //    path[i] = alt;
+            //    i--;
+            //}
+
+            //Array.Reverse(path);
+
+            foreach(graphNode node in previous)
+            {
+                if (!path.Contains(node))
+                {
+                    path.Add(node);
+                }
+            }
+
+            if (path[0] == start)
+                return path;
+            return null;
+        }
+
+        public List<graphNode> breadthFirstSearch(graphNode start, graphNode end)
+        {
+            resetVisited();
+            graphNode[] previous = solve(start);
+            return pathReconstruction(start, end, previous);
+        }
+
+        public int getMaxFlow(graphNode start, graphNode end)
+        {
+            int maxIntake = 0;
+            foreach(graphNode node in asortedNodes)
+            {
+                if (node.adjacency.Contains(end))
+                {
+                    int index = node.adjacency.IndexOf(end);
+                    maxIntake += node.weight[index];
+                }
+            }
+
+            graph flow = new graph(breadthFirstSearch(start, end));     // get path
+            // START THE LOOP HERE
+            int minFlow = int.MaxValue;
+            graphNode lastNode = start;
+            foreach(graphNode node in flow.sortedNodes)     // Get minimum path value of flow
+            {
+                if (node != start)
+                {
+                    int index = lastNode.adjacency.IndexOf(node);
+                    if (lastNode.weight[index] < minFlow)
+                        minFlow = lastNode.weight[index];
+                    lastNode = node;
+                }
+            }
+
+            //graph residual = new graph(this);
+            graph residual = new graph(asortedNodes, sortedNodes);      // create residual
+            lastNode = start;
+            foreach (graphNode flowNode in flow.sortedNodes)
+            {
+                if (flowNode != start)
+                {
+                    int weightIndex = lastNode.adjacency.IndexOf(flowNode);
+                    int nodeIndex = residual.sortedNodes.IndexOf(lastNode);         
+                    residual.sortedNodes[nodeIndex].weight[weightIndex] -= minFlow;
+
+                    if (residual.sortedNodes[nodeIndex].weight[weightIndex] <= 0)
+                    {
+                        residual.sortedNodes[nodeIndex].adjacency[weightIndex] = null;
+                    }
+                    lastNode = flowNode;
+                }
+            }
+
+            flow = new graph(residual.breadthFirstSearch(start, end));
+            flow.printSortedNodes();
+
+            return 0;
+        }
+
+        //public List<graphNode> getShortestPath(graphNode start, graphNode end)
+        //{
+        //    resetVisited();
+        //    List<graphNode> activeQueue = new List<graphNode>();
+        //    activeQueue.Add(start);
+
+        //    while (activeQueue.Count > 0)    // while queue: <- stand-in line until I understand what this means
+        //    {
+        //        //graphNode element = activeQueue[0];
+        //        //activeQueue.RemoveAt(0);
+        //        //List<graphNode> path = new List<graphNode>();
+        //        //path.Add(element);
+        //        List<graphNode> path = new List<graphNode>();
+        //        path.Add(activeQueue[0]);
+        //        activeQueue.RemoveAt(0);
+        //        graphNode element = path[ path.Count - 1];
+
+        //        if (element == end)
+        //            return path;
+
+        //        foreach(graphNode node in element.adjacency)
+        //        {
+        //            //if (!activeQueue.Contains(node))
+        //            //{
+        //            List<graphNode> newPath = new List<graphNode>(path);
+        //            newPath.Add(node);
+        //            activeQueue.AddRange(newPath);
+        //            //}
+        //        }
+        //    }
+
+        //    return null;
+        //}
+
+        //public graph clone()
+        //{
+        //    graph deepCloneGraph = new graph()
+        //}
+
+        public graph(graphNode[] asortedNodes) { this.asortedNodes.AddRange(asortedNodes); }
+        public graph(List<graphNode> sortedNodes) { this.sortedNodes = sortedNodes; }
+        public graph(List<graphNode> asortedNodes, List<graphNode> sortedNodes) { this.asortedNodes = asortedNodes; this.sortedNodes = sortedNodes; }
+
+        ////https://stackoverflow.com/questions/14007405/how-create-a-new-deep-copy-clone-of-a-listt
+        //public graph(List<graphNode> asortedNodes, List<graphNode> sortedNodes) 
+        //{ 
+        //    this.asortedNodes = asortedNodes.ConvertAll(node => new graphNode(node.key)).ToList(); 
+        //    this.sortedNodes = sortedNodes.ConvertAll(node => new graphNode(node.key)).ToList(); 
+        //}
+        public graph(graph oldGraph) { oldGraph.asortedNodes = this.asortedNodes; oldGraph.sortedNodes = this.sortedNodes; }
+    } 
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            graphNode s = new graphNode('s');
+            graphNode A = new graphNode('A');
+            graphNode B = new graphNode('B');
+            graphNode C = new graphNode('C');
+            graphNode D = new graphNode('D');
+            graphNode t = new graphNode('t');
+
+            s.adjacency.AddRange(new graphNode[] { A, B });
+            A.adjacency.AddRange(new graphNode[] { B, C, D });
+            B.adjacency.Add(D);
+            C.adjacency.Add(t);
+            D.adjacency.Add(t);
+
+            s.weight.AddRange(new int[] { 4, 2 });
+            A.weight.AddRange(new int[] { 1, 2, 4 });
+            B.weight.Add(2);
+            C.weight.Add(3);
+            D.weight.Add(3);
+
+            graph testGraph = new graph(new graphNode[] { s, A, B, C, D, t });
+            testGraph.topSort();
+            testGraph.printSortedNodes();
+
+            //List<graphNode> testPath = testGraph.breadthFirstSearch(s, t);
+            int maxFlow = testGraph.getMaxFlow(s, t);
+
+            Console.WriteLine();
+        }
+    }
+}

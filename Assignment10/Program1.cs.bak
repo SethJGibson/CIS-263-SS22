@@ -1,0 +1,456 @@
+﻿/*---------------------------------------------------------------------------------------
+    Program:     Assignment 10
+
+    OK, this is the issue.
+    
+    This program is mostly functional. I'm able to create a graph, fit with nodes that
+    have keys and hold lists of adjacencies with references to other nodes, as well as
+    corresponding weights for each adjacency. I'm able to use breadthFirstSearch() to 
+    get a shortest path and the current version of getMaxFlow() is able to create the
+    first Flow and Residual graph by getting the minimum flow of the shortest path, 
+    subtracting those weights from a copy of the full graph, the Residual, and doing it 
+    all over again by getting a new shortest path from the Residual and adding new nodes
+    from that path to the Flow graph. 
+
+    The issue is that when I create Flow and Residual, I'm only creating references to 
+    the first graph, with references to the original nodes. Because of that, when I 
+    subtract weights and remove adjacencies from Residual, which are elements of the
+    graphNodes, I'm deleting properties from the original graphNodes, and those need to
+    stay in-tact to create more residuals down the line. The obvious answer is to create
+    a deep-copy of the graph, which would create copies of all the nodes and their 
+    adjacencies, but the adjacencies are references to nodes in a node list, so just 
+    copying these references would cause these adjacencies to still point to the original
+    nodes. How do I get the adjacencies to point towards corresponding node copies?
+
+    I am fully aware that this issue is completely caused by me not switching to an 
+    adjacency graph early on, and that I've totally dug my own grave here. This big 
+    problem is hindering the last few TODO steps I need to complete this program (281-229),
+    but at this point I need to put more emphasis on studying and this program is too far 
+    out from completion to work on without risk of affecting my exam score. 
+
+    If there's not an easy fix here that I'm not seeing, than all I'm asking is how I can
+    output the most I can to get the highest score possible for unfinished work. Any
+    advice would be greatly appreciated.
+
+    Wow, this became an essay quick. At least I'll have no trouble in the short-response
+    section. 
+
+    - SJG
+---------------------------------------------------------------------------------------*/
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Assignment10
+{
+    public class graphNode
+    {
+        public List<graphNode> adjacency = new List<graphNode>();
+        public List<int> weight = new List<int>();
+
+        public char key;
+
+        public bool visited = false;
+
+        public graphNode(char key) { this.key = key; }
+
+        //public graphNode(List<graphNode> adjacency, List<int> weight, char key, bool visited) 
+        //{ 
+
+        //}
+
+        //public object Clone() { return this.MemberwiseClone(); }
+    }
+
+    public class graph
+    {
+        public List<graphNode> asortedNodes = new List<graphNode>();
+
+        public List<graphNode> sortedNodes = new List<graphNode>();
+
+        private void resetVisited()
+        {
+            foreach (graphNode node in asortedNodes)
+                node.visited = false;
+        }
+
+        public void depthFirstSearch(int j, List<graphNode> visitedNodes)
+        {
+            asortedNodes[j].visited = true;
+
+            foreach (graphNode node in asortedNodes[j].adjacency)
+            {
+                if (node.visited == false)
+                    depthFirstSearch(asortedNodes.IndexOf(node), visitedNodes);
+            }
+            visitedNodes.Add(asortedNodes[j]);
+        }
+
+        public void topSort()
+        {
+            int n = asortedNodes.Count;
+
+            for (int j = 0; j < n; j++)
+            {
+                if (asortedNodes[j].visited == false)
+                {
+                    List<graphNode> visitedNodes = new List<graphNode>();
+                    depthFirstSearch(j, visitedNodes);
+                    foreach (graphNode node in visitedNodes)
+                        sortedNodes.Insert(0, node);
+                }
+            }
+        }
+
+        public void printSortedNodes()
+        {
+            Console.WriteLine("~Topological Sort~");
+            foreach (graphNode node in sortedNodes)
+            {
+                if (node != null)
+                    Console.Write(node.key + " ");
+            }
+                
+            Console.WriteLine("");
+        }
+
+        private graphNode[] solve(graphNode start)
+        {
+            Queue<graphNode> exitQueue = new Queue<graphNode>();
+            exitQueue.Enqueue(start);
+
+            start.visited = true;
+
+            graphNode[] previous = new graphNode[asortedNodes.Count];
+            while (exitQueue.Count != 0)
+            {
+                graphNode element = exitQueue.Dequeue();
+                foreach(graphNode node in element.adjacency)
+                {
+                    if (node != null)
+                    {
+                        if (!node.visited)
+                        {
+                            exitQueue.Enqueue(node);
+                            node.visited = true;
+                            //int test = node.adjacency.IndexOf(node);
+                            previous[asortedNodes.IndexOf(node) - 1] = element;
+                        }
+                    }
+                }
+            }
+
+            return previous;
+        }
+
+        private List<graphNode> pathReconstruction(graphNode start, graphNode end, graphNode[] previous)
+        {
+            previous[previous.Length - 1] = end;
+            List<graphNode> path = new List<graphNode>();
+
+            foreach(graphNode node in previous)
+            {
+                if (!path.Contains(node))
+                {
+                    path.Add(node);
+                }
+            }
+
+            if (path[0] == start)
+                return path;
+            return null;
+        }
+
+        public List<graphNode> breadthFirstSearch(graphNode start, graphNode end)
+        {
+            resetVisited();
+            graphNode[] previous = solve(start);
+            return pathReconstruction(start, end, previous);
+        }
+
+        public graph graphCopy(bool flow)
+        {
+            graphNode s = new graphNode('s');
+            graphNode A = new graphNode('A');
+            graphNode B = new graphNode('B');
+            graphNode C = new graphNode('C');
+            graphNode D = new graphNode('D');
+            graphNode t = new graphNode('t');
+
+            s.adjacency.AddRange(new graphNode[] { A, B });
+            A.adjacency.AddRange(new graphNode[] { B, C, D });
+            B.adjacency.Add(D);
+            C.adjacency.Add(t);
+            D.adjacency.Add(t);
+
+            if (flow)
+            {
+                s.weight.AddRange(new int[] { 0, 0 });
+                A.weight.AddRange(new int[] { 0, 0, 0 });
+                B.weight.Add(0);
+                C.weight.Add(0);
+                D.weight.Add(0);
+            }
+            else
+            {
+                s.weight.AddRange(new int[] { 4, 2 });
+                A.weight.AddRange(new int[] { 1, 2, 4 });
+                B.weight.Add(2);
+                C.weight.Add(3);
+                D.weight.Add(3);
+            }
+
+            return new graph(new graphNode[] { s, A, B, C, D, t });
+        }
+
+        public void setWeight(char firstKey, char secondKey, int weight)
+        {
+            foreach(graphNode firstNode in sortedNodes)
+            {
+                if (firstNode.key == firstKey)
+                {
+                    for (int i = 0; i < firstNode.adjacency.Count; i++)
+                    {
+                        if (firstNode.adjacency[i].key == secondKey)
+                        {
+                            firstNode.weight[i] = weight;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        public int getWeight(char firstKey, char secondKey)
+        {
+            foreach (graphNode firstNode in sortedNodes)
+            {
+                if (firstNode.key == firstKey)
+                {
+                    for (int i = 0; i < firstNode.adjacency.Count; i++)
+                    {
+                        if (firstNode.adjacency[i].key == secondKey)
+                        {
+                            return firstNode.weight[i];
+                        }
+                    }
+                }
+            }
+            return -1;
+        }
+
+        //public int getMaxIntake(graphNode targetNode)
+        //{
+        //    int result = 0;
+        //    foreach (graphNode node in asortedNodes)
+        //    {
+        //        if (node.adjacency.Contains(targetNode))
+        //        {
+        //            int index = node.adjacency.IndexOf(targetNode);
+        //            result += node.weight[index];
+        //        }
+        //    }
+        //    return result;
+        //}
+
+        public int getMaxIntake(char targetKey)
+        {
+            int result = 0;
+            foreach (graphNode node in asortedNodes)
+            {
+                for (int i = 0; i < node.adjacency.Count; i++)
+                {
+                    if (node.adjacency[i].key == targetKey)
+                        result += node.weight[i];
+                }
+            }
+
+            return result;
+        }
+
+        public int getMaxFlow(graphNode start, graphNode end)
+        {
+            //int maxIntake = 0;
+            //foreach(graphNode node in asortedNodes)
+            //{
+            //    if (node.adjacency.Contains(end))
+            //    {
+            //        int index = node.adjacency.IndexOf(end);
+            //        maxIntake += node.weight[index];
+            //    }
+            //}
+            //int maxIntake = getMaxIntake(end);
+            int maxIntake = getMaxIntake(end.key);
+
+            /* CREATE FIRST FLOW ITERATION */
+            //graph flow = new graph(breadthFirstSearch(start, end));     // get path
+            List<graphNode> shortestPath = breadthFirstSearch(start, end);
+            //List<graphNode> flowNodes = new List<graphNode>();
+            //foreach (graphNode node in shortestPath)
+
+            //for (int i = 0; i < shortestPath.Count; i++)
+            //{
+            //    graphNode newNode = new graphNode(shortestPath[i].key);
+            //    if (shortestPath[i] != start)
+            //        flowNodes[i - 1].adjacency.Add(newNode);
+            //    flowNodes.Add(newNode);
+            //}
+            //graph flow = new graph(flowNodes);
+
+            int minFlow = int.MaxValue;
+            graphNode lastNode = start;
+            foreach (graphNode node in shortestPath)        // Get minimum path value of flow
+            {
+                if (node != start)
+                {
+                    int index = lastNode.adjacency.IndexOf(node);
+                    if (lastNode.weight[index] < minFlow)
+                        minFlow = lastNode.weight[index];
+                    lastNode = node;
+                }
+            }
+
+            graph flow = graphCopy(true);                   // Create first flow iteration
+            flow.topSort();
+            for (int i = 0; i < shortestPath.Count - 1; i++)
+                flow.setWeight(shortestPath[i].key, shortestPath[i + 1].key, minFlow);
+
+            int flowIntake = flow.getMaxIntake(end.key);
+
+            /* START THE LOOP HERE */
+
+            do
+            {
+                graph residual = graphCopy(false);              // Create residual
+                residual.topSort();
+
+                foreach (graphNode node in flow.sortedNodes)
+                {
+                    for (int i = 0; i < node.weight.Count; i++)
+                    {
+                        if (node.weight[i] != 0)
+                        {
+                            residual.setWeight(node.key, node.adjacency[i].key, (residual.getWeight(node.key, node.adjacency[i].key) - node.weight[i]));
+                        }
+                    }
+                }
+
+                //graph residual = new graph(this);
+                //graph residual = new graph(asortedNodes, sortedNodes);      // create residual
+                //List<graphNode> residualNodes = new List<graphNode>();
+                //for (int i = 0; i < shortestPath.Count; i++)
+                //{
+                //    graphNode newNode = new graphNode(shortestPath[i].key);
+                //    if (shortestPath[i] != start)
+                //        flowNodes[i - 1].adjacency.Add(newNode);
+                //    flowNodes.Add(newNode);
+                //}
+
+                //for (int i = 0; i < sortedNodes.Count; i++)
+                //{
+                //    graphNode newNode = new graphNode(sortedNodes[i].key);
+                //    residualNodes.Add(newNode);
+                //}
+
+                //foreach (graphNode node in residualNodes)
+                //{
+                //    if (node.key != end.key)
+                //    {
+
+                //    }
+                //}
+                //foreach(graphNode node in sortedNodes)
+
+                //for (int i = 0; i < sortedNodes.Count; i++)
+                //{
+
+                //}
+
+                lastNode = start;
+                foreach (graphNode flowNode in flow.sortedNodes)
+                {
+                    if (flowNode != start)
+                    {
+                        int weightIndex = lastNode.adjacency.IndexOf(flowNode);
+                        int nodeIndex = residual.sortedNodes.IndexOf(lastNode);
+                        residual.sortedNodes[nodeIndex].weight[weightIndex] -= minFlow;
+
+                        if (residual.sortedNodes[nodeIndex].weight[weightIndex] <= 0)
+                        {
+                            residual.sortedNodes[nodeIndex].adjacency[weightIndex] = null;
+                        }
+                        lastNode = flowNode;
+                    }
+                }
+
+                // TODO:
+                // 1. Figure out a way to deep-copy all contents of a graph for flow & residual, even individual nodes, but also have adjacencies point to cloned nodes as well
+
+                flow = new graph(residual.breadthFirstSearch(start, end));  // 2. Create an alt. initializer function that adds the nodes from a new path to an existing flow graph
+                flow.printSortedNodes();
+            } while (true);    // FIX this fucking thing
+                
+
+            // 3. Implement a check if breadthFirstSearch() returns a path, exit loop if it doesn't
+
+            /* END THE LOOP HERE */
+
+            // 4. Actually build the start and end of the loop
+            // God, this is the hardest programming assignment I've ever worked on. I've really wedged myself into a hole here, huh?
+
+            return 0;
+        }
+
+        //public graph clone()
+        //{
+        //    graph deepCloneGraph = new graph()
+        //}
+
+        public graph(graphNode[] asortedNodes) { this.asortedNodes.AddRange(asortedNodes); }
+        public graph(List<graphNode> sortedNodes) { this.sortedNodes = sortedNodes; }
+        public graph(List<graphNode> asortedNodes, List<graphNode> sortedNodes) { this.asortedNodes = asortedNodes; this.sortedNodes = sortedNodes; }
+
+        ////https://stackoverflow.com/questions/14007405/how-create-a-new-deep-copy-clone-of-a-listt
+        //public graph(List<graphNode> asortedNodes, List<graphNode> sortedNodes) 
+        //{ 
+        //    this.asortedNodes = asortedNodes.ConvertAll(node => new graphNode(node.key)).ToList(); 
+        //    this.sortedNodes = sortedNodes.ConvertAll(node => new graphNode(node.key)).ToList(); 
+        //}
+        public graph(graph oldGraph) { oldGraph.asortedNodes = this.asortedNodes; oldGraph.sortedNodes = this.sortedNodes; }
+    } 
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            graphNode s = new graphNode('s');
+            graphNode A = new graphNode('A');
+            graphNode B = new graphNode('B');
+            graphNode C = new graphNode('C');
+            graphNode D = new graphNode('D');
+            graphNode t = new graphNode('t');
+
+            s.adjacency.AddRange(new graphNode[] { A, B });
+            A.adjacency.AddRange(new graphNode[] { B, C, D });
+            B.adjacency.Add(D);
+            C.adjacency.Add(t);
+            D.adjacency.Add(t);
+
+            s.weight.AddRange(new int[] { 4, 2 });
+            A.weight.AddRange(new int[] { 1, 2, 4 });
+            B.weight.Add(2);
+            C.weight.Add(3);
+            D.weight.Add(3);
+
+            graph testGraph = new graph(new graphNode[] { s, A, B, C, D, t });
+            testGraph.topSort();
+            testGraph.printSortedNodes();
+
+            //List<graphNode> testPath = testGraph.breadthFirstSearch(s, t);
+            int maxFlow = testGraph.getMaxFlow(s, t);
+
+            Console.WriteLine();
+        }
+    }
+}
