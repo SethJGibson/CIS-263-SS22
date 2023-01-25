@@ -1,0 +1,13 @@
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.exe
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.deps.json
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.runtimeconfig.json
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.runtimeconfig.dev.json
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.dll
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\bin\Debug\netcoreapp3.1\Assignment 1 - CS.pdb
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.csproj.AssemblyReference.cache
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.AssemblyInfoInputs.cache
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.AssemblyInfo.cs
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.csproj.CoreCompileInputs.cache
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.dll
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.pdb
+D:\SCHOOLWORK\CIS 263\Assignment 1 - CS\obj\Debug\netcoreapp3.1\Assignment 1 - CS.genruntimeconfig.cache
